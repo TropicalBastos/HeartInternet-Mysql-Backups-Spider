@@ -12,7 +12,6 @@ class HeartSpider(scrapy.Spider):
     reseller = "https://customer.heartinternet.uk/manage/reseller/index.cgi"
     backupsUrl = "https://customer.heartinternet.uk/manage/mysql-backups.cgi"
     loginUrl = "https://customer.heartinternet.uk/manage/login.cgi"
-    identityProvider = "https://customer.heartinternet.uk/manage/login-via-identity-postback.cgi?provider=HI;provider-details={%22volatile_key%22:%221507674931:207570:5edf07171344cd65b9621e0170c5bc835ea5f6c8%22};destination=;permanent=;json=0;sitedesigner_trial="
     start_urls = [loginUrl]
     email = "THE_USERNAME"
     password = "THE_PASSWORD"
