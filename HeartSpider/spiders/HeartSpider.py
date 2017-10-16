@@ -82,7 +82,7 @@ class HeartSpider(scrapy.Spider):
     def downloadBackups(self, response):
         curr_date = datetime.datetime.now()
         dir_name = curr_date.strftime("%d-%m-%Y")
-        file_name = "mysql-backups.zip"
+        file_name = dir_name + "-mysql-backups.zip"
 
         if(os.path.exists(self.base_path + dir_name) == False):
             os.makedirs(self.base_path + dir_name)
@@ -96,4 +96,4 @@ class HeartSpider(scrapy.Spider):
         print("Download complete! " + str(file_size) + " bytes written to " + dest)
 
         #finally run checks with our maintainer
-        runChecks()
+        self.runChecks()

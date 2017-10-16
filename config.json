@@ -1,6 +1,6 @@
 {
     "username" : "",
     "password" : "",
-    "limit" : 2,
-    "baseUrl" : "/home/ian/Downloads"
+    "limit" : 0,
+    "baseUrl" : ""
 }
