@@ -1,20 +1,18 @@
 import scrapy
 import os
 import time
+import json
 import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
+from ..helpers.Maintainer import Maintainer
 
 class HeartSpider(scrapy.Spider):
-    base_path = "/home/ian/Downloads/"
     name = 'heart'
     reseller = "https://customer.heartinternet.uk/manage/reseller/index.cgi"
     backupsUrl = "https://customer.heartinternet.uk/manage/mysql-backups.cgi"
     loginUrl = "https://customer.heartinternet.uk/manage/login.cgi"
     start_urls = [loginUrl]
-    email = "THE_USERNAME"
-    password = "THE_PASSWORD"
     query = ""
     mysqlRoute = "https://customer.heartinternet.uk/manage/perform-mysql-backups.cgi?"
     otherRoute = "https://customer.heartinternet.uk/manage/mysql-backups.cgi"
@@ -41,7 +39,14 @@ class HeartSpider(scrapy.Spider):
         return args;"""
 
     def __init__(self):
-        self.driver = webdriver.PhantomJS("bin/phantomjs")
+        with open("config.json", "r") as config:
+            configJson = json.load(config)
+            self.email = configJson["username"]
+            self.password = configJson["password"]
+            self.base_path = configJson["baseUrl"]
+
+        self.maintainer = Maintainer(self.base_path)
+        self.driver = webdriver.PhantomJS("HeartSpider/bin/phantomjs")
 
     def parse(self, response):
         #use selenium now
@@ -53,6 +58,7 @@ class HeartSpider(scrapy.Spider):
         self.driver.find_element_by_id("hi-login-form").submit()
         #return scrapy.Request(self.backupsUrl, self.backups)
         self.backups()
+
         return scrapy.FormRequest.from_response(
             response,
             formid="hi-login-form",
@@ -70,6 +76,9 @@ class HeartSpider(scrapy.Spider):
         print("Starting download...")
         return scrapy.Request(self.mysqlRoute + self.query, self.downloadBackups)
 
+    def runChecks(self):
+        self.maintainer.maintain()
+
     def downloadBackups(self, response):
         curr_date = datetime.datetime.now()
         dir_name = curr_date.strftime("%d-%m-%Y")
@@ -85,3 +94,6 @@ class HeartSpider(scrapy.Spider):
         f.close()
         file_size = len(response.body)
         print("Download complete! " + str(file_size) + " bytes written to " + dest)
+
+        #finally run checks with our maintainer
+        runChecks()
