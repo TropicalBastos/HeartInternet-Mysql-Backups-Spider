@@ -24,17 +24,8 @@ class HeartSpider(scrapy.Spider):
             }
             var this_id = backups[i].name;
             this_id = this_id.replace(/backup-/, '');
-            limited_item_configs['packages'].selectedIds.push(this_id);
-        }
-
-        if(limited_item_configs['packages'].selectedIds.length == 0) {
-            alert("Nothing is selected.");
-            return;
-        } else {
-            for(var i = 0; i < limited_item_configs['packages'].selectedIds.length; i++) {
-            args += 'pid='+limited_item_configs['packages'].selectedIds[i]+';';
-            }
-        }    
+            args += 'pid=' + this_id + ';';
+        }  
         args += 'loader=1';
         return args;"""
 
@@ -46,6 +37,10 @@ class HeartSpider(scrapy.Spider):
             self.base_path = configJson["baseUrl"]
 
         self.maintainer = Maintainer(self.base_path)
+
+        #debug driver
+        #self.driver = webdriver.Firefox("/usr/bin/")
+
         self.driver = webdriver.PhantomJS("HeartSpider/bin/phantomjs")
 
     def parse(self, response):
@@ -68,8 +63,20 @@ class HeartSpider(scrapy.Spider):
 
     def backups(self):
         self.driver.get(self.backupsUrl)
-        self.driver.execute_script("toggle_all_selected();")
-        self.query = self.driver.execute_script(self.findBackupsScript)
+        pages = int(self.driver.find_element_by_id("page-count").text)
+
+        for p in range(0, pages):
+            if p > 0:
+                self.driver.find_element_by_xpath('//*[@id="content-only"]/p[3]/a[3]').click()
+                time.sleep(2)
+
+            self.driver.execute_script("set_all_backup_selections('checked');")
+            self.query += self.driver.execute_script(self.findBackupsScript)
+
+            #if p is less than page limit then remove any unwanted loader strings
+            if p < pages - 1:
+                self.query = self.query.replace("loader=1", "")
+                
         print(self.query)
 
     def afterLogin(self, response):
