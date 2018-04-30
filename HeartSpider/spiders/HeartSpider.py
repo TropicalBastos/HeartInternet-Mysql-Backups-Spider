@@ -57,7 +57,7 @@ class HeartSpider(scrapy.Spider):
         return scrapy.FormRequest.from_response(
             response,
             formid="hi-login-form",
-            formdata={"email": "heart@1pcs.co.uk", "password": "RedSky!2!2"},
+            formdata={"email": self.email, "password": self.password},
             callback=self.afterLogin
         )
 
